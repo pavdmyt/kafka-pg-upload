@@ -30,5 +30,14 @@ def parse_config():
             "KAPG_AUTOOFFSETRESET", "earliest"
         ),
         "consumer_sleep_interval": env.float("KAPG_CONSUMER_SLEEP", 2.0),
+        # PostgreSQL related configuration
+        #
+        "pg_host": env.str("KAPG_PG_HOST", "localhost"),
+        "pg_port": env.int("KAPG_PG_PORT", 5432),
+        "pg_user": env.str("KAPG_PG_USER", "postgres"),
+        "pg_password": env.str("KAPG_PG_PWD", "changeme"),
+        "pg_db_name": env.str("KAPG_PG_DB_NAME", "metrics"),
+        "pg_table_name": env.str("KAPG_PG_TABLE_NAME", "pagemonitor"),
+        "pg_conn_timeout": env.float("KAPG_PG_CONN_TIMEOUT", 10.0),
     }
     return DotDict(config)
