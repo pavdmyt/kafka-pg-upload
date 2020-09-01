@@ -22,7 +22,7 @@ build: fmt isort
 	@poetry build
 
 run:
-	pip uninstall -y kafka-pg-uplodad
+	pip uninstall -y kafka-pg-upload
 	pip install dist/$(name)-*-py3-none-any.whl
 	echo ""
 	kafka-pg-upload
