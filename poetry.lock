@@ -50,6 +50,14 @@ docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface"]
 
 [[package]]
+category = "main"
+description = "Function decoration for backoff and retry"
+name = "backoff"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+version = "1.10.0"
+
+[[package]]
 category = "dev"
 description = "The uncompromising code formatter."
 name = "black"
@@ -357,7 +365,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "d021b0ad8a5eb656c16ea68dc70e56776f3d484b0aa73394b390672abb5f3e70"
+content-hash = "b4f518f29d21eb7fd24f6967be6e6740a6b3f11208db5866e904538510cb67dc"
 lock-version = "1.1"
 python-versions = "^3.8"
 
@@ -404,6 +412,10 @@ atomicwrites = [
 attrs = [
     {file = "attrs-20.1.0-py2.py3-none-any.whl", hash = "sha256:2867b7b9f8326499ab5b0e2d12801fa5c98842d2cbd22b35112ae04bf85b4dff"},
     {file = "attrs-20.1.0.tar.gz", hash = "sha256:0ef97238856430dcf9228e07f316aefc17e8939fc8507e18c6501b761ef1a42a"},
+]
+backoff = [
+    {file = "backoff-1.10.0-py2.py3-none-any.whl", hash = "sha256:5e73e2cbe780e1915a204799dba0a01896f45f4385e636bcca7a0614d879d0cd"},
+    {file = "backoff-1.10.0.tar.gz", hash = "sha256:b8fba021fac74055ac05eb7c7bfce4723aedde6cd0a504e5326bcb0bdd6d19a4"},
 ]
 black = [
     {file = "black-20.8b1-py3-none-any.whl", hash = "sha256:70b62ef1527c950db59062cda342ea224d772abdf6adc58b86a45421bab20a6b"},

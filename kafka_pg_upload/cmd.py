@@ -74,4 +74,10 @@ async def main():
 def run():
     # Handle Ctrl+C
     signal.signal(signal.SIGINT, lambda signal, frame: sys.exit(0))
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(main())
+    except asyncio.exceptions.CancelledError:
+        print({"error": "tasks has been cancelled"})
+    finally:
+        loop.close()
