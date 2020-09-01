@@ -18,9 +18,17 @@ def parse_config():
 
     config = {
         # Kafka related configuration
-        "kafka_broker_list": env.str("PAGEMON_BROKER_LIST", "localhost:9092,"),
-        "kafka_topic": env.str("PAGEMON_KAFKA_TOPIC", "pagemonitor_metrics"),
-        # How many times to retry sending a failing Message.
-        "producer_retries": env.int("PAGEMON_PRODUCER_RETRIES", 3),
+        #
+        "kafka_broker_list": env.str("KAPG_BROKER_LIST", "localhost:9092,"),
+        "kafka_topic": env.str("KAPG_KAFKA_TOPIC", "pagemonitor_metrics"),
+        # Client group id string. All clients sharing the same group.id belong
+        # to the same group
+        "consumer_group.id": env.str("KAPG_GROUP_ID", "42"),
+        # Action to take when there is no initial offset in offset store or
+        # the desired offset is out of range
+        "consumer_auto.offset.reset": env.str(
+            "KAPG_AUTOOFFSETRESET", "earliest"
+        ),
+        "consumer_sleep_interval": env.float("KAPG_CONSUMER_SLEEP", 2.0),
     }
     return DotDict(config)

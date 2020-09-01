@@ -3,10 +3,12 @@ import signal
 import sys
 
 import environs
+from confluent_kafka import Consumer
 
 from . import __version__
 from .config import parse_config
-from .logger import log
+from .consumer import consume
+from .logger import consumer_log, log
 
 
 async def main():
@@ -23,6 +25,25 @@ async def main():
         version=__version__,
         config=conf,
     )
+
+    # Instantiate Kafka consumer
+    # Configuration options:
+    # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+    kafka_client = Consumer(
+        # XXX: production setup should communicate via SSL
+        {
+            "bootstrap.servers": conf.kafka_broker_list,
+            "group.id": conf["consumer_group.id"],
+            "auto.offset.reset": conf["consumer_auto.offset.reset"],
+        },
+        logger=consumer_log,
+    )
+
+    queue = asyncio.Queue()
+    consumers = asyncio.create_task(
+        consume(kafka_client, conf, queue, logger=log)
+    )
+    await asyncio.gather(consumers)
 
 
 def run():
