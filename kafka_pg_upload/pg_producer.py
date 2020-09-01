@@ -29,7 +29,6 @@ async def produce(conn, conf, queue, logger):
             f")"
         )
     )
-
     # Main loop
     try:
         while True:
