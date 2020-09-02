@@ -57,7 +57,7 @@ async def main():
     log.info("connecting to postgresql", **pg_conf)
     try:
         pg_conn = await asyncpg.connect(**pg_conf)
-    except asyncpg.exceptions.PostgresError as err:
+    except (asyncpg.exceptions.PostgresError, OSError) as err:
         log.error(error=err)
         sys.exit(1)
 

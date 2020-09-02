@@ -8,8 +8,8 @@ import backoff
 from asyncpg.exceptions import InterfaceError, PostgresConnectionError
 
 
-def _backoff_handler(details):
-    """Pretty-print backoff details."""
+def _backoff_handler(details) -> None:
+    """Callback for backoff.on_exception to pretty-print backoff details."""
     msg = {
         "event": "backoff",
         "target": repr(details["target"]),
@@ -22,7 +22,8 @@ def _backoff_handler(details):
     print(json.dumps(msg))
 
 
-def compose_insert_query(table_name, msg):
+def _compose_insert_query(table_name: str, msg: dict) -> str:
+    """Build SQL query to insert row with metrics data into a table."""
     url = msg["page_url"]
     code = int(msg["http_code"])
     resp_time = int(msg["response_time"])
@@ -34,19 +35,22 @@ def compose_insert_query(table_name, msg):
     return query
 
 
+def _create_table_query(table_name: str) -> str:
+    """Build SQL query to create metrics table."""
+    return (
+        f"CREATE TABLE IF NOT EXISTS {table_name}("
+        f"    id SERIAL PRIMARY KEY,"
+        f"    page_url TEXT,"
+        f"    http_code SMALLINT,"
+        f"    response_time INT,"
+        f"    timestamp TIMESTAMPTZ"
+        f")"
+    )
+
+
 async def produce(conn, conf, queue, logger):
     # Create table
-    await conn.execute(
-        (
-            f"CREATE TABLE IF NOT EXISTS {conf.pg_table_name}("
-            f"    id SERIAL PRIMARY KEY,"
-            f"    page_url TEXT,"
-            f"    http_code SMALLINT,"
-            f"    response_time INT,"
-            f"    timestamp TIMESTAMPTZ"
-            f")"
-        )
-    )
+    await conn.execute(_create_table_query(conf.pg_table_name))
 
     # TODO: conn does not get's reestablished after failure,
     #       need to implement restoration
@@ -64,7 +68,7 @@ async def produce(conn, conf, queue, logger):
             msg_bytes = await queue.get()
             msg = json.loads(msg_bytes)
             logger.info("writing metric to PostgreSQL")
-            query = compose_insert_query(conf.pg_table_name, msg)
+            query = _compose_insert_query(conf.pg_table_name, msg)
             try:
                 await backoff_deco(conn.execute)(query)
             # Handle losing connection to DB
