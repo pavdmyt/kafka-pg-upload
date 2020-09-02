@@ -39,6 +39,6 @@ def parse_config():
         "pg_db_name": env.str("KAPG_PG_DB_NAME", "metrics"),
         "pg_table_name": env.str("KAPG_PG_TABLE_NAME", "pagemonitor"),
         "pg_conn_timeout": env.float("KAPG_PG_CONN_TIMEOUT", 10.0),
-        "pg_backoff_retries": env.int("KAPG_PG_BACKOFF_RETRIES", 10),
+        "pg_command_timeout": env.float("KAPG_PG_COMMAND_TIMEOUT", 10.0),
     }
     return DotDict(config)

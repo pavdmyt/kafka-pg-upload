@@ -53,6 +53,7 @@ async def main():
         password=conf.pg_password,
         database=conf.pg_db_name,
         timeout=conf.pg_conn_timeout,
+        command_timeout=conf.pg_command_timeout,
     )
     log.info("connecting to postgresql", **pg_conf)
     try:
