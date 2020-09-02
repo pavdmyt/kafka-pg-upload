@@ -13,7 +13,11 @@ from .logger import consumer_log, log
 from .pg_producer import produce
 
 
-async def main():
+async def main() -> None:
+    """Main logic.
+
+    Implements programm's flow.
+    """
     # Get Config
     try:
         conf = parse_config()
@@ -72,9 +76,13 @@ async def main():
     await asyncio.gather(consumers)
 
 
-def run():
-    # Handle Ctrl+C
+def run() -> None:
+    """Entry point for the built executable."""
+    # TODO: signals should be registered on event loop, with proper handling
+    #       for each of them.
+    # Temporary solution.
     signal.signal(signal.SIGINT, lambda signal, frame: sys.exit(0))
+
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(main())

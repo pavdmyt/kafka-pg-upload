@@ -1,4 +1,4 @@
-"""Kafka consumer.
+"""Kafka consumer code.
 
 """
 
@@ -12,6 +12,12 @@ from .config import DotDict
 async def consume(
     client: Consumer, conf: DotDict, queue: Queue, logger
 ) -> None:
+    """Reads messages from the specified topic.
+
+    Messages are placed into the queue for subsequent processing.
+    In case of connectivity failures to Kafka Broker, retries till
+    connection is available again.
+    """
     client.subscribe([conf.kafka_topic])
 
     # Process messages

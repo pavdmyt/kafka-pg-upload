@@ -26,3 +26,6 @@ run:
 	pip install dist/$(name)-*-py3-none-any.whl
 	echo ""
 	kafka-pg-upload
+
+mypy:
+	@mypy ./$(name)

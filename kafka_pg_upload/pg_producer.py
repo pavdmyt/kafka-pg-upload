@@ -3,8 +3,12 @@
 """
 import asyncio
 import json
+from asyncio import Queue
 
+from asyncpg import Connection
 from asyncpg.exceptions import InterfaceError, PostgresConnectionError
+
+from .config import DotDict
 
 
 def _compose_insert_query(table_name: str, msg: dict) -> str:
@@ -33,7 +37,17 @@ def _create_table_query(table_name: str) -> str:
     )
 
 
-async def produce(conn, conf, queue, logger):
+async def produce(
+    conn: Connection, conf: DotDict, queue: Queue, logger
+) -> None:
+    """Reads messages from queue, build rows and insert them into PG table.
+
+    Gracefully cancels async tasks and shutdown event loop in case of
+    connectivity issues with PostgreSQL. It is assumed that service failures
+    should be handled by container orchestration software (it is easy in
+    Kubernetes).
+
+    """
     # Create table
     await conn.execute(_create_table_query(conf.pg_table_name))
 

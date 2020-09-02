@@ -1,3 +1,9 @@
+"""Tools to parse configuration from environment variables.
+
+Store configuration separate from your code, as per The Twelve-Factor App
+methodology.
+
+"""
 from environs import Env
 
 
@@ -9,10 +15,16 @@ class DotDict(dict):
     __delattr__ = dict.__delitem__
 
 
-# Store configuration separate from your code, as per The Twelve-Factor App
-# methodology.
-def parse_config():
-    # TODO: add type hints
+def parse_config() -> DotDict:
+    """Parse configuration parameters from environment variables.
+
+    Makes type validation.
+
+    Raises:
+        environs.EnvValidationError: if parsed data does not conform
+            expected type.
+
+    """
     env = Env()
     env.read_env()
 
