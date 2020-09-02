@@ -4,22 +4,7 @@
 import asyncio
 import json
 
-import backoff
 from asyncpg.exceptions import InterfaceError, PostgresConnectionError
-
-
-def _backoff_handler(details) -> None:
-    """Callback for backoff.on_exception to pretty-print backoff details."""
-    msg = {
-        "event": "backoff",
-        "target": repr(details["target"]),
-        "args": details["args"],
-        "kwargs": details["kwargs"],
-        "tries": details["tries"],
-        "elapsed": details["elapsed"],
-        "wait": details["wait"],
-    }
-    print(json.dumps(msg))
 
 
 def _compose_insert_query(table_name: str, msg: dict) -> str:
@@ -52,16 +37,6 @@ async def produce(conn, conf, queue, logger):
     # Create table
     await conn.execute(_create_table_query(conf.pg_table_name))
 
-    # TODO: conn does not get's reestablished after failure,
-    #       need to implement restoration
-    backoff_deco = backoff.on_exception(
-        backoff.expo,
-        (InterfaceError, PostgresConnectionError),
-        on_backoff=_backoff_handler,
-        max_tries=conf.pg_backoff_retries,
-        jitter=None,
-    )
-
     # Main loop
     try:
         while True:
@@ -70,7 +45,7 @@ async def produce(conn, conf, queue, logger):
             logger.info("writing metric to PostgreSQL")
             query = _compose_insert_query(conf.pg_table_name, msg)
             try:
-                await backoff_deco(conn.execute)(query)
+                await conn.execute(query)
             # Handle losing connection to DB
             except (InterfaceError, PostgresConnectionError) as err:
                 logger.error(error=err)
