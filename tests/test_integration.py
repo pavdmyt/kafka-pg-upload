@@ -1,4 +1,3 @@
-import json
 import multiprocessing as mp
 import os
 import time
@@ -6,7 +5,7 @@ import time
 import kafka_pg_upload
 
 
-def test_e2e(kafka_producer, conf_topic, messages, pg_reader):
+def test_e2e(produce_to_kafka, conf_topic, messages, pg_reader):
     """End-to-end test of the service.
 
     Write test messages into the Kafka test topic (new created for every
@@ -17,15 +16,8 @@ def test_e2e(kafka_producer, conf_topic, messages, pg_reader):
     are compared.
 
     """
-    # Produce messages into Kafka test topic
-    #
-    for msg in messages:
-        kafka_producer.produce(
-            conf_topic,
-            key=msg["page_url"],
-            value=json.dumps(msg),
-        )
-    kafka_producer.flush()
+    # Produce messages into Kafka test topic is hadled by
+    # produce_to_kafka fixture
 
     # Run kafka-pg-upload and wait a bit
     #

@@ -1,36 +1,59 @@
+import json
 import time
 from random import randint
 
 import psycopg2
 import pytest
-from confluent_kafka import Producer
+from confluent_kafka import Consumer, Producer
 
 from kafka_pg_upload.config import parse_config
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def app_conf():
     return parse_config()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def conf_broker_list():
     return "localhost:9092,"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def conf_topic():
     ts = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     return f"_test_{ts}"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def kafka_producer(conf_broker_list):
     return Producer(
         {
             "bootstrap.servers": conf_broker_list,
         },
     )
+
+
+@pytest.fixture(scope="module")
+def kafka_consumer(conf_broker_list, app_conf):
+    return Consumer(
+        {
+            "bootstrap.servers": conf_broker_list,
+            "group.id": 17,
+            "auto.offset.reset": app_conf["consumer_auto.offset.reset"],
+        },
+    )
+
+
+@pytest.fixture
+def produce_to_kafka(kafka_producer, messages, conf_topic):
+    for msg in messages:
+        kafka_producer.produce(
+            conf_topic,
+            key=msg["page_url"],
+            value=json.dumps(msg),
+        )
+    kafka_producer.flush()
 
 
 @pytest.fixture

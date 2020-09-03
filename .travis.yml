@@ -6,6 +6,7 @@ services:
   - docker
 before_install:
   - docker-compose up -d
+  - sleep 10  # some time for services to start up
   - docker exec -ti postgres psql -U postgres -c "CREATE DATABASE metrics;"
 install:
   - make travis-setup
