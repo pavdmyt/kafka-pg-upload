@@ -33,3 +33,10 @@ run:
 
 mypy:
 	@mypy ./$(name)
+
+travis-setup:
+	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+	poetry install
+
+ci:
+	poetry run py.test --capture=no
