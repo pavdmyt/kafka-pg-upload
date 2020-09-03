@@ -47,7 +47,7 @@ def parse_config() -> DotDict:
         "pg_host": env.str("KAPG_PG_HOST", "localhost"),
         "pg_port": env.int("KAPG_PG_PORT", 5432),
         "pg_user": env.str("KAPG_PG_USER", "postgres"),
-        "pg_password": env.str("KAPG_PG_PWD", "changeme"),
+        "pg_password": env.str("KAPG_PG_PWD", "foopwd"),
         "pg_db_name": env.str("KAPG_PG_DB_NAME", "metrics"),
         "pg_table_name": env.str("KAPG_PG_TABLE_NAME", "pagemonitor"),
         "pg_conn_timeout": env.float("KAPG_PG_CONN_TIMEOUT", 10.0),

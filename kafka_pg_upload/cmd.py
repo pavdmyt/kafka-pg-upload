@@ -6,11 +6,13 @@ import asyncpg
 import environs
 from confluent_kafka import Consumer
 
-from . import __version__
 from .config import parse_config
 from .kafka_consumer import consume
 from .logger import consumer_log, log
 from .pg_producer import produce
+
+
+__version__ = "0.1.0"
 
 
 async def main() -> None:

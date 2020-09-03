@@ -6,11 +6,15 @@ fmt:
 lint:
 	@pylint ./$(name) -rn -f colorized
 
+lint-tests:
+	@pylint ./tests -rn -f colorized
+
 isort:
 	@isort --atomic --verbose $(name)/
+	@isort --atomic --verbose tests/
 
 test:
-	@pytest
+	@pytest --capture=no
 
 clean:
 	@find . -type d -name '__pycache__' -exec rm -rf {} +
