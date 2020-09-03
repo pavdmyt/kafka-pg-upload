@@ -13,3 +13,13 @@ python:
   - "3.8"
 script:
   - make ci
+
+jobs:
+  include:
+    - stage: coverage
+      python:
+        - "3.8"
+      script:
+        - make coverage
+      after_success:
+        - coveralls
