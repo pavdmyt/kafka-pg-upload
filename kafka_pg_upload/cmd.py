@@ -1,5 +1,6 @@
 import asyncio
 import signal
+import ssl
 import sys
 
 import asyncpg
@@ -39,20 +40,34 @@ async def main() -> None:
 
     # Configuration options:
     # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+    client_conf = {
+        "bootstrap.servers": conf.kafka_broker_list,
+        "group.id": conf["consumer_group.id"],
+        "auto.offset.reset": conf["consumer_auto.offset.reset"],
+    }
+
+    if conf.kafka_enable_cert_auth:
+        auth_conf = {
+            "security.protocol": "ssl",
+            "ssl.key.location": conf.kafka_ssl_key,
+            "ssl.certificate.location": conf.kafka_ssl_cert,
+            "ssl.ca.location": conf.kafka_ssl_ca,
+        }
+        client_conf.update(auth_conf)
+
     kafka_client = Consumer(
-        # XXX: production setup should communicate via SSL
-        {
-            "bootstrap.servers": conf.kafka_broker_list,
-            "group.id": conf["consumer_group.id"],
-            "auto.offset.reset": conf["consumer_auto.offset.reset"],
-        },
+        client_conf,
         logger=consumer_log,
     )
 
     # Establish PostgreSQL connection
     #
+    if conf.pg_enable_ssl:
+        ssl_ctx = ssl.create_default_context(cafile=conf.pg_ssl_ca)
+    else:
+        ssl_ctx = False
+
     pg_conf = dict(
-        # XXX: production setup should communicate via SSL
         host=conf.pg_host,
         port=conf.pg_port,
         user=conf.pg_user,
@@ -60,6 +75,7 @@ async def main() -> None:
         database=conf.pg_db_name,
         timeout=conf.pg_conn_timeout,
         command_timeout=conf.pg_command_timeout,
+        ssl=ssl_ctx,
     )
     log.info("connecting to postgresql", **pg_conf)
     try:

@@ -42,6 +42,19 @@ def parse_config() -> DotDict:
             "KAPG_AUTOOFFSETRESET", "earliest"
         ),
         "consumer_sleep_interval": env.float("KAPG_CONSUMER_SLEEP", 2.0),
+        "kafka_enable_cert_auth": env.bool(
+            "KAPG_KAFKA_ENABLE_CERT_AUTH", False
+        ),
+        # Only when cert authentication mode enabled
+        "kafka_ssl_ca": env.path(
+            "KAPG_KAFKA_SSL_CA", "/etc/kapg/ssl/kafka/ca.pem"
+        ),
+        "kafka_ssl_cert": env.path(
+            "KAPG_KAFKA_SSL_CERT", "/etc/kapg/ssl/kafka/service.cert"
+        ),
+        "kafka_ssl_key": env.path(
+            "KAPG_KAFKA_SSL_KEY", "/etc/kapg/ssl/kafka/service.key"
+        ),
         # PostgreSQL related configuration
         #
         "pg_host": env.str("KAPG_PG_HOST", "localhost"),
@@ -52,5 +65,10 @@ def parse_config() -> DotDict:
         "pg_table_name": env.str("KAPG_PG_TABLE_NAME", "pagemonitor"),
         "pg_conn_timeout": env.float("KAPG_PG_CONN_TIMEOUT", 10.0),
         "pg_command_timeout": env.float("KAPG_PG_COMMAND_TIMEOUT", 10.0),
+        # SSL config
+        "pg_enable_ssl": env.bool("KAPG_PG_ENABLE_SSL", False),
+        "pg_ssl_ca": env.path(
+            "KAPG_PG_SSL_CA", "/etc/kapg/ssl/postgres/ca.pem"
+        ),
     }
     return DotDict(config)
