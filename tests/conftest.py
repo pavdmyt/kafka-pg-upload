@@ -15,30 +15,25 @@ def app_conf():
 
 
 @pytest.fixture(scope="module")
-def conf_broker_list():
-    return "localhost:9092,"
-
-
-@pytest.fixture(scope="module")
 def conf_topic():
     ts = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     return f"_test_{ts}"
 
 
 @pytest.fixture(scope="module")
-def kafka_producer(conf_broker_list):
+def kafka_producer(app_conf):
     return Producer(
         {
-            "bootstrap.servers": conf_broker_list,
+            "bootstrap.servers": app_conf.kafka_broker_list,
         },
     )
 
 
 @pytest.fixture(scope="module")
-def kafka_consumer(conf_broker_list, app_conf):
+def kafka_consumer(app_conf):
     return Consumer(
         {
-            "bootstrap.servers": conf_broker_list,
+            "bootstrap.servers": app_conf.kafka_broker_list,
             "group.id": 17,
             "auto.offset.reset": app_conf["consumer_auto.offset.reset"],
         },

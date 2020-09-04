@@ -27,11 +27,11 @@ def test_e2e(produce_to_kafka, conf_topic, messages, pg_reader):
     os.environ["KAPG_KAFKA_TOPIC"] = conf_topic
     os.environ["KAPG_PG_TABLE_NAME"] = conf_table
 
-    # Run as separate process
-    p = mp.Process(target=kafka_pg_upload.run)
-    p.start()
+    # Run kafka_pg_upload as separate process
+    proc = mp.Process(target=kafka_pg_upload.run)
+    proc.start()
     time.sleep(8)
-    p.terminate()
+    proc.terminate()
 
     # Read records from PostgreSQL test table
     #
