@@ -44,3 +44,6 @@ travis-setup:
 
 ci:
 	poetry run py.test --capture=no
+
+export-requirements:
+	@poetry export -f requirements.txt --dev > requirements.txt
