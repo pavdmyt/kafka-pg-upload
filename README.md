@@ -2,6 +2,8 @@ kafka-pg-upload
 ===============
 
 [![Build Status](https://travis-ci.org/pavdmyt/kafka-pg-upload.svg?branch=master)](https://travis-ci.org/pavdmyt/kafka-pg-upload)
+[![Updates](https://pyup.io/repos/github/pavdmyt/kafka-pg-upload/shield.svg)](https://pyup.io/repos/github/pavdmyt/kafka-pg-upload/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Is a microservice to consume messages from [Kafka](https://kafka.apache.org/)
 topic and write them into [PostgreSQL](https://www.postgresql.org/).
