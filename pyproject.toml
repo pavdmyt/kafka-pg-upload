@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kafka-pg-upload"
-version = "0.1.0"
+version = "0.2.0"
 description = "Consume data from Kafka topics and upload it into PostgreSQL"
 license = "MIT"
 authors = ["Pavlo Dmytrenko <mail@pavdmyt.com>"]

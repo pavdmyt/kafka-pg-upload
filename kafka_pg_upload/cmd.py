@@ -12,7 +12,7 @@ from .logger import log
 from .pg_producer import produce
 
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 
 async def shutdown(
