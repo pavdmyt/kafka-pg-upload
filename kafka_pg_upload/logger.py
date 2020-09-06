@@ -1,6 +1,4 @@
-"""Pre-built loggers to produce structured logs in JSON format.
-
-"""
+"""Pre-built loggers to produce structured logs in JSON format."""
 import logging
 import sys
 

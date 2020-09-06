@@ -1,26 +1,74 @@
 import asyncio
+import functools
 import signal
-import ssl
 import sys
 
-import asyncpg
 import environs
 from confluent_kafka import Consumer
 
 from .config import parse_config
-from .kafka_consumer import consume
-from .logger import consumer_log, log
+from .kafka_consumer import consume, new_consumer
+from .logger import log
 from .pg_producer import produce
 
 
 __version__ = "0.1.0"
 
 
-async def main() -> None:
-    """Main logic.
+async def shutdown(
+    loop,
+    conn_queue: asyncio.Queue,
+    kafka_client: Consumer,
+    _signal=None,
+) -> None:
+    """Cleanup tasks tied to the service's shutdown."""
+    if _signal:
+        log.info("received exit signal", signal=_signal.name)
 
-    Implements programm's flow.
+    log.info("close down and terminate the Kafka consumer")
+    kafka_client.close()
+    pg_conn = await conn_queue.get()
+    if pg_conn:
+        log.info("closing PostgreSQL connection")
+        await pg_conn.close()
+
+    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    for task in tasks:
+        task.cancel()
+
+    log.info(f"cancelling {len(tasks)} outstanding tasks")
+    await asyncio.gather(*tasks, return_exceptions=True)
+    loop.stop()
+
+
+def handle_exceptions(
+    loop, ctx, conn_queue: asyncio.Queue, kafka_client: Consumer
+) -> None:
     """
+    Custom exception handler for event loop.
+
+    Context is a dict object containing the following keys:
+
+    ‘message’:  Error message;
+    ‘exception’ (optional): Exception object;
+    ‘future’    (optional): asyncio.Future instance;
+    ‘handle’    (optional): asyncio.Handle instance;
+    ‘protocol’  (optional): Protocol instance;
+    ‘transport’ (optional): Transport instance;
+    ‘socket’    (optional): socket.socket instance.
+
+    https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.call_exception_handler
+
+    """
+    # context["message"] will always be there; but context["exception"] may not
+    msg = ctx.get("exception", ctx["message"])
+    log.error("caught exception", exception=msg)
+    log.info("Shutting down...")
+    asyncio.create_task(shutdown(loop, conn_queue, kafka_client))
+
+
+def run() -> None:
+    """Entry point for the built executable."""
     # Get Config
     try:
         conf = parse_config()
@@ -35,76 +83,34 @@ async def main() -> None:
         config=conf,
     )
 
-    # Instantiate Kafka consumer
-    #
-
-    # Configuration options:
-    # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
-    client_conf = {
-        "bootstrap.servers": conf.kafka_broker_list,
-        "group.id": conf["consumer_group.id"],
-        "auto.offset.reset": conf["consumer_auto.offset.reset"],
-    }
-
-    if conf.kafka_enable_cert_auth:
-        auth_conf = {
-            "security.protocol": "ssl",
-            "ssl.key.location": conf.kafka_ssl_key,
-            "ssl.certificate.location": conf.kafka_ssl_cert,
-            "ssl.ca.location": conf.kafka_ssl_ca,
-        }
-        client_conf.update(auth_conf)
-
-    kafka_client = Consumer(
-        client_conf,
-        logger=consumer_log,
-    )
-
-    # Establish PostgreSQL connection
-    #
-    if conf.pg_enable_ssl:
-        ssl_ctx = ssl.create_default_context(cafile=conf.pg_ssl_ca)
-    else:
-        ssl_ctx = False
-
-    pg_conf = dict(
-        host=conf.pg_host,
-        port=conf.pg_port,
-        user=conf.pg_user,
-        password=conf.pg_password,
-        database=conf.pg_db_name,
-        timeout=conf.pg_conn_timeout,
-        command_timeout=conf.pg_command_timeout,
-        ssl=ssl_ctx,
-    )
-    log.info("connecting to postgresql", **pg_conf)
-    try:
-        pg_conn = await asyncpg.connect(**pg_conf)
-    except (asyncpg.exceptions.PostgresError, OSError) as err:
-        log.error(error=err)
-        sys.exit(1)
-
-    # Initiate consumer-producer pattern
-    #
+    # Instantiate clients
+    kafka_client = new_consumer(conf)
     queue = asyncio.Queue()
-    consumers = asyncio.create_task(
-        consume(kafka_client, conf, queue, logger=log)
-    )
-    asyncio.create_task(produce(pg_conn, conf, queue, logger=log))
-    await asyncio.gather(consumers)
+    conn_queue = asyncio.Queue()  # used to share PG connection
 
-
-def run() -> None:
-    """Entry point for the built executable."""
-    # TODO: signals should be registered on event loop, with proper handling
-    #       for each of them.
-    # Temporary solution.
-    signal.signal(signal.SIGINT, lambda signal, frame: sys.exit(0))
-
+    # Signals handling
     loop = asyncio.get_event_loop()
+    signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
+    for s in signals:
+        loop.add_signal_handler(
+            s,
+            lambda s=s: asyncio.create_task(
+                shutdown(loop, conn_queue, kafka_client, _signal=s)
+            ),
+        )
+
+    # Exception handler must be a callable with the signature matching
+    # (loop, context)
+    # https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.set_exception_handler
+    exc_handler = functools.partial(
+        handle_exceptions, conn_queue=conn_queue, kafka_client=kafka_client
+    )
+    loop.set_exception_handler(exc_handler)
+
     try:
-        loop.run_until_complete(main())
-    except asyncio.exceptions.CancelledError:
-        print({"error": "tasks has been cancelled"})
+        loop.create_task(consume(kafka_client, conf, queue, log))
+        loop.create_task(produce(conf, queue, conn_queue, log))
+        loop.run_forever()
     finally:
         loop.close()
+        log.info("shutdown successfully")
