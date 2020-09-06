@@ -2,6 +2,8 @@ kafka-pg-upload
 ===============
 
 [![Build Status](https://travis-ci.org/pavdmyt/kafka-pg-upload.svg?branch=master)](https://travis-ci.org/pavdmyt/kafka-pg-upload)
+[![codecov](https://codecov.io/gh/pavdmyt/kafka-pg-upload/branch/master/graph/badge.svg)](https://codecov.io/gh/pavdmyt/kafka-pg-upload)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/10ac01fad4944e3985569b150e21431c)](https://www.codacy.com/manual/pavdmyt/kafka-pg-upload?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=pavdmyt/kafka-pg-upload&amp;utm_campaign=Badge_Grade)
 [![Updates](https://pyup.io/repos/github/pavdmyt/kafka-pg-upload/shield.svg)](https://pyup.io/repos/github/pavdmyt/kafka-pg-upload/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
