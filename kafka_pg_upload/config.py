@@ -1,3 +1,4 @@
+# type: ignore
 """
 Tools to parse configuration from environment variables.
 

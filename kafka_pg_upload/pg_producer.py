@@ -2,6 +2,7 @@
 import asyncio
 import json
 import ssl
+from typing import Any, Tuple, Union
 
 import asyncpg
 
@@ -55,7 +56,11 @@ def _create_table_query(table_name: str) -> str:
     )
 
 
-def _handle_exc(results: list, conn_queue: asyncio.Queue, logger):
+def _handle_exc(
+    results: Tuple[Union[Any, BaseException]],
+    conn_queue: asyncio.Queue,
+    logger,
+):
     for res in results:
         if isinstance(res, Exception):
             logger.error("failed to connect to PostgreSQL", error=res)
@@ -89,12 +94,12 @@ async def produce(
     asyncio.create_task(conn_queue.put(conn))
 
     # Create table
-    await conn.execute(_create_table_query(conf.pg_table_name))
+    await conn.execute(_create_table_query(conf.pg_table_name))  # type: ignore
 
     while True:
         msg_bytes = await queue.get()
         msg = json.loads(msg_bytes)
         logger.info("writing metric to PostgreSQL")
         query = _compose_insert_query(conf.pg_table_name, msg)
-        await conn.execute(query)
+        await conn.execute(query)  # type: ignore
         queue.task_done()
