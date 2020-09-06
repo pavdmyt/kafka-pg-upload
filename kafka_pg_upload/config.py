@@ -1,4 +1,5 @@
-"""Tools to parse configuration from environment variables.
+"""
+Tools to parse configuration from environment variables.
 
 Store configuration separate from your code, as per The Twelve-Factor App
 methodology.
@@ -8,6 +9,7 @@ from environs import Env
 
 
 class DotDict(dict):
+
     """dot.notation access to dict attributes."""
 
     __getattr__ = dict.get
@@ -16,7 +18,8 @@ class DotDict(dict):
 
 
 def parse_config() -> DotDict:
-    """Parse configuration parameters from environment variables.
+    """
+    Parse configuration parameters from environment variables.
 
     Makes type validation.
 
