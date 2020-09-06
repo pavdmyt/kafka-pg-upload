@@ -27,9 +27,10 @@ async def shutdown(
 
     log.info("close down and terminate the Kafka consumer")
     kafka_client.close()
-    log.info("closing PostgreSQL connection")
     pg_conn = await conn_queue.get()
-    await pg_conn.close()
+    if pg_conn:
+        log.info("closing PostgreSQL connection")
+        await pg_conn.close()
 
     tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
     for task in tasks:

@@ -55,6 +55,14 @@ def _create_table_query(table_name: str) -> str:
     )
 
 
+def _handle_exc(results: list, conn_queue: asyncio.Queue, logger):
+    for res in results:
+        if isinstance(res, Exception):
+            logger.error("failed to connect to PostgreSQL", error=res)
+            asyncio.create_task(conn_queue.put(None))
+            raise res  # trigger global exception handler
+
+
 async def produce(
     conf: DotDict, queue: asyncio.Queue, conn_queue: asyncio.Queue, logger
 ) -> None:
@@ -67,7 +75,15 @@ async def produce(
     Kubernetes).
 
     """
-    conn = await connect_pg(conf, logger)
+    # If return_exceptions=True, exceptions are treated the same as successful
+    # results, and aggregated in the result list
+    conn_or_exc = await asyncio.gather(
+        connect_pg(conf, logger), return_exceptions=True
+    )
+    _handle_exc(conn_or_exc, conn_queue, logger)
+
+    # Will execute if there were no exceptions at establishing connection
+    conn = conn_or_exc[0]
     # Using a dedicated queue to share PG connection with `shutdown`
     # to properly clean up
     asyncio.create_task(conn_queue.put(conn))
