@@ -141,9 +141,9 @@ lazy-object-proxy==1.4.3 \
     --hash=sha256:a6ae12d08c0bf9909ce12385803a543bfe99b95fe01e752536a60af2b7797c62 \
     --hash=sha256:5541cada25cd173702dbd99f8e22434105456314462326f06dba3e180f203dfd \
     --hash=sha256:59f79fef100b09564bc2df42ea2d8d21a64fdcda64979c0fa3db7bdaabaf6239
-marshmallow==3.7.1 \
-    --hash=sha256:67bf4cae9d3275b3fc74bd7ff88a7c98ee8c57c94b251a67b031dc293ecc4b76 \
-    --hash=sha256:a2a5eefb4b75a3b43f05be1cca0b6686adf56af7465c3ca629e5ad8d1e1fe13d
+marshmallow==3.8.0 \
+    --hash=sha256:2272273505f1644580fbc66c6b220cc78f893eb31f1ecde2af98ad28011e9811 \
+    --hash=sha256:47911dd7c641a27160f0df5fd0fe94667160ffe97f70a42c3cc18388d86098cc
 mccabe==0.6.1 \
     --hash=sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42 \
     --hash=sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f
